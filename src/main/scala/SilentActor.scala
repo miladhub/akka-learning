@@ -2,7 +2,7 @@ import akka.actor.{Actor, ActorRef}
 
 object SilentActor {
   case class SilentMessage(data: String)
-  case class GetState(receiver: ActorRef)
+  case class GetState()
 }
 
 class SilentActor extends Actor {
@@ -11,7 +11,7 @@ class SilentActor extends Actor {
   def receive = {
     case SilentMessage(data) =>
       internalState = internalState :+ data
-    case GetState(receiver) => receiver ! internalState
+    case GetState => sender() ! internalState
   }
 
   def state = internalState

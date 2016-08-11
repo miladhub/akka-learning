@@ -1,5 +1,5 @@
 import akka.actor.{ActorSystem, Props}
-import akka.testkit.{TestActorRef, TestKit}
+import akka.testkit.{ImplicitSender, TestActorRef, TestKit}
 import org.scalatest.{BeforeAndAfterAll, MustMatchers, Suite, WordSpecLike}
 
 import scala.concurrent.Await
@@ -9,28 +9,29 @@ import scala.util.Random
 class ActorsSpec extends TestKit(ActorSystem("testsystem"))
   with WordSpecLike
   with MustMatchers
+  with ImplicitSender
   with StopSystemAfterAll {
 
   "A silent actor" must {
-    "changes state when it receives a message, single threaded" in {
+    "change state when it receives a message, single threaded" in {
       import SilentActor._
 
       val silentActor = TestActorRef[SilentActor]
       silentActor ! SilentMessage("whisper")
       silentActor.underlyingActor.state must contain("whisper")
     }
-    "changes state when it receives a message, multi-threaded" in {
+    "change state when it receives a message, multi-threaded" in {
       import SilentActor._
       val silentActor = system.actorOf(Props[SilentActor], "s3")
       silentActor ! SilentMessage("whisper1")
       silentActor ! SilentMessage("whisper2")
-      silentActor ! GetState(testActor)
+      silentActor ! GetState
       expectMsg(Vector("whisper1", "whisper2"))
     }
   }
 
   "A sending actor" must {
-    "sends a message to another actor when it has finished processing" in {
+    "send a message to another actor when it has finished processing" in {
       import SendingActor._
       val props = SendingActor.props(testActor)
       val sendingActor = system.actorOf(props, "sendingActor")
